@@ -9,6 +9,7 @@ import config
 TXT_SRC_FOLDER = config.TXT_SRC_FOLDER
 TARGET_COLUMNS = config.TARGET_COLUMNS
 EXCLUDE_FLIES = config.EXCLUDE_FLIES
+LONG_FORM = config.LONG_FORM
 CSV_DST_FOLDER = config.CSV_DST_FOLDER
 
 
@@ -53,9 +54,17 @@ def txt_converter():
                 if (idx == 0):
                     df_list.append(tmp_df)
                 else:
-                    df_list.append(tmp_df[col_name])
+                    if (len(tmp_df[col_name]) > len(df_list[0])):
+                        df_list.append(tmp_df[col_name][:len(df_list[0])])
+                    else:
+                        df_list.append(tmp_df[col_name])
 
             df = pd.concat(df_list, axis=1, ignore_index=False)
+            df.set_index('datetime')
+
+            if (LONG_FORM):
+                df = df.melt('datetime', var_name='param', value_name='value')
+
             df.to_csv(
                 f'{CSV_DST_FOLDER}/{foldername}/{foldername}.csv', index=False)
     else:
