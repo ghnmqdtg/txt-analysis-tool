@@ -20,8 +20,7 @@ def convert_to_df(filepath, col_name):
                      header=None,
                      delim_whitespace=True)
 
-    df['datetime'] = pd.to_datetime(
-        df['datetime'], unit='ms')
+    df['datetime'] = pd.to_datetime(df['datetime'], unit='ms')
 
     # TODO: Split nest data
     if (col_name in ['DO', 'pH']):

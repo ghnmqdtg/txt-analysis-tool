@@ -130,3 +130,7 @@ dmypy.json
 
 # Misc
 .DS_Store
+
+# Project file
+src/
+output/
