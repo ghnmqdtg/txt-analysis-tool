@@ -6,7 +6,7 @@ def create_folder(dir):
         os.makedirs(dir)
 
 
-def parse_folder(folder, extension, exclude):
+def parse_folder(folder, extension, exclude=[]):
     filepaths = {}
 
     for dirPath, dirNames, fileNames in os.walk(folder, topdown=True):
