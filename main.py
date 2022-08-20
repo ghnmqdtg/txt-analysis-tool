@@ -45,12 +45,14 @@ if __name__ == '__main__':
     CSV_DST_FOLDER = config.CSV_DST_FOLDER
     EXCLUDE_FLIES = config.EXCLUDE_FLIES
     TARGET_COLUMNS = config.TARGET_COLUMNS
+
     filepaths = parse_folder(CSV_DST_FOLDER, '.csv', EXCLUDE_FLIES)
     setuppaths = parse_folder(CSV_DST_FOLDER, '.json', EXCLUDE_FLIES)
 
     if (filepaths):
         main()
     else:
+        # If the target folder doesn't exist, convert the txt files
         txt_to_csv.txt_converter()
         filepaths = parse_folder(CSV_DST_FOLDER, '.csv', EXCLUDE_FLIES)
         setuppaths = parse_folder(CSV_DST_FOLDER, '.json', EXCLUDE_FLIES)

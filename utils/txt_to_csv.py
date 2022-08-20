@@ -14,7 +14,18 @@ LONG_FORM = config.LONG_FORM
 CSV_DST_FOLDER = config.CSV_DST_FOLDER
 
 
-def convert_to_df(filepath, col_name):
+def convert_to_df(filepath: str, col_name: str) -> pd.DataFrame:
+    """
+    Convert a filepath to a df structure
+
+    Parameters
+    ----------
+    filepath: str
+        Path to the file
+    col_name: str
+        The name of the column
+    """
+
     df = pd.read_csv(filepath,
                      usecols=TARGET_COLUMNS['range'],
                      names=['datetime', col_name],
@@ -36,9 +47,14 @@ def convert_to_df(filepath, col_name):
 
 
 def txt_converter():
+    """
+    Converter for txt files
+    """
+    # Create the folder if it doesn't exist
     create_folder(TXT_SRC_FOLDER)
     create_folder(CSV_DST_FOLDER)
 
+    # Parse the txt source folder, and get the paths of files from folders in it
     filepaths = parse_folder(TXT_SRC_FOLDER, ('.txt', '.json'), EXCLUDE_FLIES)
     # print(json.dumps(filepaths, sort_keys=True, indent=4))
 
@@ -71,6 +87,7 @@ def txt_converter():
                     else:
                         df_list.append(tmp_df[col_name])
 
+            # Concatenate df_list into a single dataframe
             df = pd.concat(df_list, axis=1, ignore_index=False)
             df.set_index('datetime')
 

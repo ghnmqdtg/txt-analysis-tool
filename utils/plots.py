@@ -3,8 +3,22 @@ import altair as alt
 import config
 
 
-def get_boundaries(setup, spec, yaxis_scale=False):
+def get_boundaries(setup: dict, spec: dict, yaxis_scale: bool = False):
+    """
+    Get the boundaries of the selected parameter.
+
+    Parameters
+    ----------
+    setup: dict
+        The dict object loaded from the configuration experiment settings.
+    spec: dict
+        The specification of the selected parameter.
+    yaxis: bool
+        To indicate whether to enlarge the boundaries of the parameters to be the y-axis scale.
+    """
     try:
+        # Some data can't set by the user, so it won't be in settings.json
+        # That's why we use try/except here.
         setup_val = setup[spec['name']]['val']
         if (not yaxis_scale):
             return (setup_val + spec['accuracy'], setup_val - spec['accuracy'])
@@ -15,17 +29,35 @@ def get_boundaries(setup, spec, yaxis_scale=False):
         return (None, None)
 
 
-def line_chart(setup, params, data):
+def line_chart(setup: dict, params: list, data: pd.DataFrame):
+    """
+    Create a line chart for the selected parameters.
+
+    Parameters
+    ----------
+    setup: dict
+        The dict object loaded from the configuration experiment settings.
+    params: list
+        The names of selected parameters.
+    data: pandas.DataFrame
+        The data to be plotted.
+    """
+
     PARAMS_SPEC = config.PARAMS_SPEC
 
+    # Actually the altair has more interactive features, you can try them out.
+    # https://altair-viz.github.io/altair-tutorial/notebooks/06-Selections.html
+
+    # Define the scale of the y axis when there is only one parameter being selected
     if (len(params) == 1 and params[0] in PARAMS_SPEC):
         upper, lower = get_boundaries(
             setup, PARAMS_SPEC[params[0]], yaxis_scale=True)
         y_range_max = upper if (upper != None and upper >
                                 data[params[0]].max()) else data[params[0]].max()
-        y_range_min = lower if (lower != None and lower >
+        y_range_min = lower if (lower != None and lower <
                                 data[params[0]].min()) else data[params[0]].min()
 
+    # Create the lines of the selected parameters
     line = alt.Chart(data).transform_fold(
         params,
         as_=['params', 'value']
@@ -76,6 +108,8 @@ def line_chart(setup, params, data):
 
     # Add boundary lines to specific parameters
     for param in params:
+        # Some data can't set by the user, so it won't be in settings.json
+        # We well skip them
         if (param in PARAMS_SPEC):
             upper, lower = get_boundaries(setup, PARAMS_SPEC[param])
             if (upper != None) and (lower != None):
@@ -92,9 +126,10 @@ def line_chart(setup, params, data):
                     alt.Y('lower')
                 )
 
+                # Add boundaries to the line
                 line = line + uppper_bound + lower_bound
 
-    # Put the five layers into a chart and bind the data
+    # Put the layers into a single chart and bind the data
     chart = alt.layer(
         line, selectors, points, rules, text
     ).configure_axis(
