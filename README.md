@@ -26,4 +26,5 @@ $ pip3 install -r requirements.txt
 # Run the app
 $ streamlit run main.py
 ```
-![Screen Shot 2022-08-03 at 17 12 53](https://user-images.githubusercontent.com/6580698/182571482-8d62f137-dcd0-4fa8-acf7-5aec5a87af73.png)
+<img width="1395" alt="Screen Shot 2022-08-20 at 15 20 41" src="https://user-images.githubusercontent.com/6580698/185734388-768fdf38-c774-424a-97a4-02088160cf80.png">
+
