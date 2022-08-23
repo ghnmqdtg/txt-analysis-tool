@@ -15,7 +15,7 @@ The target txt file is in the format of 2 columns: Unix timestamps and value, wi
 ```
 
 ## Develop Environment
-- MacOS 12.5
+- MacOS 12.5 / Windows 11
 - Python 3.9.7 64-bits
 
 ## Usage
@@ -28,3 +28,98 @@ $ streamlit run main.py
 ```
 <img width="1395" alt="Screen Shot 2022-08-20 at 15 20 41" src="https://user-images.githubusercontent.com/6580698/185734388-768fdf38-c774-424a-97a4-02088160cf80.png">
 
+## How to build the app?
+The best way to share the Streamlit app would be to run it on a server and share the app URL, but sometimes we need to run it internally. It's possible but a little bit complex to build the app with Pyinstaller. I built it on Windows by following this [tutorial](https://discuss.streamlit.io/t/using-pyinstaller-or-similar-to-create-an-executable/902/18), and made some updates.
+
+
+1. Create a wrap for the `main.py` at the root folder. For example: `./run_main.py`:
+    #### **`./run_main.py`**
+    ```python
+    import streamlit.cli
+
+    if __name__ == '__main__':
+        streamlit.cli._main_run_clExplicit('main.py', 'streamlit run')
+    ```
+
+2. Add function `_main_run_clExplicit()` to `cli.py` in streamlit distribution:
+    #### **`${YOUR_CONDA_ENV}/lib/site-packages/streamlit/cli.py`**
+    ```python
+    def _main_run_clExplicit(file, command_line, args=[]):
+        streamlit._is_running_with_streamlit = True
+        bootstrap.run(file, command_line, args, flag_options={})
+    ```
+
+3. Create `./hooks/hook-streamlit.py` to copy the metadata of streamlit:
+    #### **`./hooks/hook-streamlit.py`**
+    ```python
+    from PyInstaller.utils.hooks import copy_metadata
+    
+    datas = copy_metadata('streamlit')
+    ```
+
+4. Create `./.streamlit/config.toml` to set the port:
+    #### **`./.streamlit/config.toml`**
+    ```toml
+    [global]
+    developmentMode = false
+
+    [server]
+    port = 8501
+    ```
+
+5. Create a `.sepc` file by running this command (my wrap is called `run_main.py`):
+    
+    ```shell
+    pyinstaller --onefile --additional-hooks-dir=./hooks run_main.py --clean
+    ```
+
+    These two options will set into the `.spec` file:
+    1. `--onefile`: To tell the pyinstaller to build a single `.exe` file.
+    2. `--additional-hooks-dir`: Add the additional hooks directory.
+
+6. Edit the generated `run_main.spec`:
+    
+    #### **`./run_main.spec`**
+    ```python
+    # -*- mode: python ; coding: utf-8 -*-
+
+    block_cipher = None
+
+    added_files = [
+        (
+            "${YOURPYTHONENV}/Lib/site-packages/altair/vegalite/v4/schema/vega-lite-schema.json",
+            "./altair/vegalite/v4/schema/"
+        ),
+        (
+            "${YOURPYTHONENV}/Lib/site-packages/streamlit/static",
+            "./streamlit/static"
+        )
+    ]
+
+    a = Analysis(['run_main.py'],
+                pathex=['.'],
+                binaries=[],
+                datas=[],
+                ...,
+                noarchive=False)
+    pyz = PYZ(...)
+    exe = EXE(...)
+    ```
+
+7. Build the app by running the following command:
+    ```shell
+    pyinstaller run_main.spec --clean
+    ```
+
+8. Clone the following files and folders into `./dist` and run the `run_main.exe` command:
+
+    1. `main.py`
+    2. `config.py`
+    3. `./.streamlit`
+    4. `./utils`
+    
+    If the app runs successfully, congratulate!
+
+## TODO
+- [ ] Deploy the app to streamlit cloud.
+- [ ] Optimize the speed of rendering large files to chart.
