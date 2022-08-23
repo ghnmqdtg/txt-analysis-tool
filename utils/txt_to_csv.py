@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 import pandas as pd
-from tqdm import tqdm
+# from tqdm import tqdm
 from utils.utils import create_folder, parse_folder, get_nest_name
 import config
 
@@ -59,7 +59,8 @@ def txt_converter():
     # print(json.dumps(filepaths, sort_keys=True, indent=4))
 
     if (len(filepaths)):
-        for folder in tqdm(filepaths, desc='Folders', bar_format='{l_bar}{bar:40}{r_bar}{bar:-10b}'):
+        # for folder in tqdm(filepaths, desc='Folders', bar_format='{l_bar}{bar:40}{r_bar}{bar:-10b}'):
+        for folder in filepaths:
             # Create empty dataframe for collecting all data from txt files
             df_list = []
             # Create dest folder
@@ -74,7 +75,7 @@ def txt_converter():
             filepaths[folder].remove(setup_filepath)
 
             # Parse all the txt files and put them into dataframe as new columns
-            for idx, data_filepath in enumerate(tqdm(filepaths[folder], desc='Files', bar_format='{l_bar}{bar:40}{r_bar}{bar:-10b}')):
+            for idx, data_filepath in enumerate(filepaths[folder]):
                 col_name = os.path.splitext(os.path.basename(data_filepath))[
                     0].replace('_', '')
                 tmp_df = convert_to_df(data_filepath, col_name)
