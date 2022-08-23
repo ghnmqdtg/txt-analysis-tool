@@ -53,7 +53,17 @@ if __name__ == '__main__':
         main()
     else:
         # If the target folder doesn't exist, convert the txt files
-        txt_to_csv.txt_converter()
-        filepaths = parse_folder(CSV_DST_FOLDER, '.csv', EXCLUDE_FLIES)
-        setuppaths = parse_folder(CSV_DST_FOLDER, '.json', EXCLUDE_FLIES)
-        main()
+        done = txt_to_csv.txt_converter()
+
+        if (done):
+            filepaths = parse_folder(CSV_DST_FOLDER, '.csv', EXCLUDE_FLIES)
+            setuppaths = parse_folder(CSV_DST_FOLDER, '.json', EXCLUDE_FLIES)
+            main()
+        else:
+            add_selectbox = st.sidebar.selectbox(
+                'Which folder do you want to select?',
+                list(filepaths.keys())
+            )
+
+            st.title('Target folder not found')
+            st.text('Please add experiment folder(s) to src and refresh the page.')

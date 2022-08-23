@@ -100,5 +100,7 @@ def txt_converter():
 
             df.to_csv(
                 f'{CSV_DST_FOLDER}/{foldername}/{foldername}.csv', index=False)
+
+            return True
     else:
-        raise ValueError('Target folder has no folder')
+        return False
