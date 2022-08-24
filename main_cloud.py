@@ -2,16 +2,19 @@ import os
 import json
 import pandas as pd
 import streamlit as st
-from utils.plots import line_chart
+import utils.plots as plot
+import plotly.express as px
 import config
 
 TARGET_COLUMNS = config.TARGET_COLUMNS
 EXCLUDE_FLIES = config.EXCLUDE_FLIES
+LONG_FORM = config.LONG_FORM
+PARAMS_SPEC = config.PARAMS_SPEC
 
 
 def section_upload():
     uploaded_files = st.file_uploader(
-        "Choose a folder of your experiment to upload", accept_multiple_files=True)
+        'Choose a folder of your experiment to upload', accept_multiple_files=True)
 
     df_list = []
     setup = None
@@ -64,18 +67,38 @@ def main():
     st.write('## Setup 1: Upload the experiment data')
     df, setup = section_upload()
 
-    if (df is not None):
+    if (df is not None and setup is not None):
         st.write('## Setup 2: Select data')
         # print(df, setup)
-        print(df)
         selected_params = st.multiselect(
             'Select parameter(s) to be plotted', [item for item in df.columns.values.tolist()
                                                   if item != 'datetime'])
+        # Convert the dataframe into a long form, which is better for plotly to use
+        # Tidy data: https://vita.had.co.nz/papers/tidy-data.pdf
+        if (LONG_FORM):
+            df = df[selected_params + ['datetime']].melt('datetime', var_name='param',
+                                                         value_name='value')
 
-        chart = line_chart(setup, selected_params, df)
+        # Create distplot with custom bin_size
+        fig = px.line(df, x='datetime',
+                      y='value',
+                      color='param', title=setup['experiment_title'] if 'experiment_title' in setup else setup['title'],
+                      height=600)
+        fig.update_traces(mode='lines', hovertemplate=None)
+        fig.update_layout(hovermode='x unified')
+        fig.update_layout(xaxis=dict(rangeslider=dict(visible=True),
+                                     type="date"))
 
-        st.altair_chart(chart,
-                        use_container_width=True)
+        for param in selected_params:
+            # Some data can't set by the user, so it won't be in settings.json
+            # We well skip them
+            if (param in PARAMS_SPEC):
+                upper, lower = plot.get_boundaries(setup, PARAMS_SPEC[param])
+                if (upper != None) and (lower != None):
+                    fig.add_hline(y=upper)
+                    fig.add_hline(y=lower)
+
+        st.plotly_chart(fig, use_container_width=True)
 
 
 if __name__ == '__main__':
