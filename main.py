@@ -28,6 +28,14 @@ def section_upload():
                     col_name = os.path.splitext(uploaded_file.name)[
                         0].replace('_', '')
 
+                    # Change the name of parameters
+                    if (col_name == 'pressure'):
+                        col_name = 'liquid level'
+                    elif (col_name == 'flowrate'):
+                        col_name = 'mixing rate'
+                    elif (col_name == 'temp'):
+                        col_name = 'temperature'
+
                     tmp_df = pd.read_csv(uploaded_file,
                                          usecols=TARGET_COLUMNS['range'],
                                          names=['datetime', col_name],
