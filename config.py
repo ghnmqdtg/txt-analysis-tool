@@ -25,7 +25,9 @@ EXCLUDE_FLIENAMES = [
 ]
 EXCLUDE_FLIES = [
     filename + extension for extension in EXTENSIONS for filename in EXCLUDE_FLIENAMES]
-LONG_FORM = False
+
+# Skip it currently
+LONG_FORM = True
 
 # Specifications of the machine
 PARAMS_SPEC = {

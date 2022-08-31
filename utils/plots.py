@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import config
@@ -45,9 +46,18 @@ def get_boundaries(setup: dict, spec: dict, yaxis_scale: bool = False):
         return (None, None)
 
 
-def single_y_chart(setup, selected_params, df):
+def single_y_chart(setup: dict, selected_params: list, df: pd.DataFrame):
     """
     Plot the single y axis chart, the df has to be long format
+
+    Parameters
+    ----------
+    setup: dict
+        The dict object loaded from the configuration experiment settings.
+    selected_params: list
+        The list of selected parameters
+    df: pd.DataFrame
+        A pandas.DataFrame containing the data
     """
 
     # Create distplot with custom bin_size
@@ -58,7 +68,14 @@ def single_y_chart(setup, selected_params, df):
     fig.update_traces(mode='lines', hovertemplate=None)
     fig.update_layout(hovermode='x unified')
     fig.update_layout(xaxis=dict(rangeslider=dict(visible=True),
-                                 type="date"))
+                                 type="date"),
+                      legend=dict(orientation="h",
+                                  yanchor="bottom",
+                                  y=1.02,
+                                  xanchor="right",
+                                  x=1
+                                  )
+                      )
 
     for param in selected_params:
         # Some data can't set by the user, so it won't be in settings.json
@@ -73,9 +90,18 @@ def single_y_chart(setup, selected_params, df):
     return fig
 
 
-def multi_y_chart(setup, selected_params, df):
+def multi_y_chart(setup: dict, selected_params: list, df: pd.DataFrame):
     """
     Plot the multi y axis chart, the df has to be wide format
+
+    Parameters
+    ----------
+    setup: dict
+        The dict object loaded from the configuration experiment settings.
+    selected_params: list
+        The list of selected parameters
+    df: pd.DataFrame
+        A pandas.DataFrame containing the data
     """
     # Plot the multi y axis chart
     fig = go.Figure()
@@ -100,106 +126,110 @@ def multi_y_chart(setup, selected_params, df):
 
     units = []
 
+    # Loopt through all selected parameters
     for idx, param in enumerate(selected_params):
+        # Get the units of the parameter
+        unit = get_units(param)
 
-        if (param != 'datetime'):
-            unit = get_units(param)
+        if (unit != None):
+            units.append(unit)
 
-            if (unit != None):
-                units.append(unit)
+        # Plot the data
+        fig.add_trace(go.Scatter(
+            x=df['datetime'],
+            y=df[param],
+            name=f'{param}',
+            yaxis=f'y{idx+1}',
+        ))
 
-            print(idx+1, unit, units)
+        # Assign the boundaries
+        if (param in PARAMS_SPEC):
+            upper, lower = get_boundaries(
+                setup, PARAMS_SPEC[param])
 
-            fig.add_trace(go.Scatter(
-                x=df['datetime'],
-                y=df[param],
-                name=f'{param}',
-                yaxis=f'y{idx+1}',
-            ))
+            if (upper != None) and (lower != None):
+                fig.add_hline(y=upper)
+                fig.add_hline(y=lower)
 
-            if (param in PARAMS_SPEC):
-                upper, lower = get_boundaries(
-                    setup, PARAMS_SPEC[param])
-
-                if (upper != None) and (lower != None):
-                    fig.add_hline(y=upper)
-                    fig.add_hline(y=lower)
-
-            # Create axis objects
-            if (idx == 0):
-                fig.update_layout(
-                    yaxis=dict(
-                        title=(units[idx] if len(units) > 0 else ''),
-                        titlefont=dict(
-                            color=COLORS[idx]
-                        ),
-                        tickfont=dict(
-                            color=COLORS[idx]
-                        )
-                    )
-                )
-            elif (idx == 1):
-                fig.update_layout(
-                    yaxis2=dict(
-                        title=(units[idx] if len(units) > 1 else ''),
-                        titlefont=dict(
-                            color=COLORS[idx]
-                        ),
-                        tickfont=dict(
-                            color=COLORS[idx]
-                        ),
-                        anchor="x",
-                        overlaying="y",
-                        side="right"
+        # Create the y axis objects
+        # plotly.express doesn't provide the multi yaxis feature
+        # We have to use a lower level api plotly.graph_objects to make it
+        # The name, color and position of yaxis, yaxis2, ..., yaxisN won't generate the automatically
+        # It has to be defined manually separately
+        if (idx == 0):
+            fig.update_layout(
+                yaxis=dict(
+                    title=(units[idx]),
+                    titlefont=dict(
+                        color=COLORS[idx]
                     ),
-                )
-            elif (idx == 2):
-                fig.update_layout(
-                    yaxis3=dict(
-                        title=(units[idx] if len(units) > 2 else ''),
-                        titlefont=dict(
-                            color=COLORS[idx]
-                        ),
-                        tickfont=dict(
-                            color=COLORS[idx]
-                        ),
-                        anchor="free",
-                        overlaying="y",
-                        side="left",
-                        position=0.1
+                    tickfont=dict(
+                        color=COLORS[idx]
                     )
                 )
-            elif (idx == 3):
-                fig.update_layout(
-                    yaxis4=dict(
-                        title=(units[idx] if len(units) > 3 else ''),
-                        titlefont=dict(
-                            color=COLORS[idx]
-                        ),
-                        tickfont=dict(
-                            color=COLORS[idx]
-                        ),
-                        anchor="free",
-                        overlaying="y",
-                        side="right",
-                        position=0.9
-                    )
+            )
+        elif (idx == 1):
+            fig.update_layout(
+                yaxis2=dict(
+                    title=(units[idx]),
+                    titlefont=dict(
+                        color=COLORS[idx]
+                    ),
+                    tickfont=dict(
+                        color=COLORS[idx]
+                    ),
+                    anchor="x",
+                    overlaying="y",
+                    side="right"
+                ),
+            )
+        elif (idx == 2):
+            fig.update_layout(
+                yaxis3=dict(
+                    title=(units[idx]),
+                    titlefont=dict(
+                        color=COLORS[idx]
+                    ),
+                    tickfont=dict(
+                        color=COLORS[idx]
+                    ),
+                    anchor="free",
+                    overlaying="y",
+                    side="left",
+                    position=0.1
                 )
-            elif (idx == 4):
-                fig.update_layout(
-                    yaxis5=dict(
-                        title=(units[idx] if len(units) > 4 else ''),
-                        titlefont=dict(
-                            color=COLORS[idx]
-                        ),
-                        tickfont=dict(
-                            color=COLORS[idx]
-                        ),
-                        anchor="free",
-                        overlaying="y",
-                        side="left",
-                        position=0.05
-                    )
+            )
+        elif (idx == 3):
+            fig.update_layout(
+                yaxis4=dict(
+                    title=(units[idx]),
+                    titlefont=dict(
+                        color=COLORS[idx]
+                    ),
+                    tickfont=dict(
+                        color=COLORS[idx]
+                    ),
+                    anchor="free",
+                    overlaying="y",
+                    side="right",
+                    position=0.9
                 )
+            )
+        elif (idx == 4):
+            fig.update_layout(
+                yaxis5=dict(
+                    title=(units[idx]),
+                    titlefont=dict(
+                        color=COLORS[idx]
+                    ),
+                    tickfont=dict(
+                        color=COLORS[idx]
+                    ),
+                    anchor="free",
+                    overlaying="y",
+                    side="left",
+                    position=0.05
+                )
+            )
 
     return fig

@@ -82,9 +82,13 @@ def main():
                 'Select parameter(s) to be plotted', [item for item in df.columns.values.tolist()
                                                       if item != 'datetime'])
 
-            # Convert the dataframe into a long form, which is better for plotly to use to plot the "single y chart"
-            # Tidy data: https://vita.had.co.nz/papers/tidy-data.pdf
-            if (LONG_FORM):
+            y_axis_option = st.selectbox(
+                'How would you like to be plot?',
+                ('Single y-axis', 'Multi y-axis'))
+
+            if (y_axis_option == 'Single y-axis'):
+                # Convert the dataframe into a long form, which is better for plotly to use to plot the "single y chart"
+                # Tidy data: https://vita.had.co.nz/papers/tidy-data.pdf
                 df = df[['datetime'] + selected_params].melt('datetime', var_name='param',
                                                              value_name='value')
                 fig = plot.single_y_chart(setup, selected_params, df)
