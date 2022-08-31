@@ -25,11 +25,11 @@ EXCLUDE_FLIENAMES = [
 ]
 EXCLUDE_FLIES = [
     filename + extension for extension in EXTENSIONS for filename in EXCLUDE_FLIENAMES]
-LONG_FORM = True
+LONG_FORM = False
 
 # Specifications of the machine
 PARAMS_SPEC = {
-    # "flowrate": {
+    # "mixing rate": {
     #     "name": "mixing_level",
     #     # TODO: Experimental value, it should be set to correct one
     #     "accuracy": 8
@@ -42,8 +42,10 @@ PARAMS_SPEC = {
         "name": "humidity",
         "accuracy": 0.1
     },
-    "temp": {
+    "temperature": {
         "name": "temp",
         "accuracy": 0.1
     },
 }
+
+COLORS = ['#636efa', '#ef553b', '#00cc96', '#ab63fa', '#ffa15a']

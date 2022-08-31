@@ -1,15 +1,14 @@
 import os
 import json
 import pandas as pd
-import streamlit as st
 import utils.plots as plot
-import plotly.express as px
+import streamlit as st
 import config
 
+st.set_page_config(layout="wide")
 TARGET_COLUMNS = config.TARGET_COLUMNS
 EXCLUDE_FLIES = config.EXCLUDE_FLIES
 LONG_FORM = config.LONG_FORM
-PARAMS_SPEC = config.PARAMS_SPEC
 
 
 def section_upload():
@@ -75,38 +74,29 @@ def main():
     st.write('## Setup 1: Upload the experiment data')
     df, setup = section_upload()
 
-    if (df is not None and setup is not None):
-        st.write('## Setup 2: Select data')
-        # print(df, setup)
-        selected_params = st.multiselect(
-            'Select parameter(s) to be plotted', [item for item in df.columns.values.tolist()
-                                                  if item != 'datetime'])
-        # Convert the dataframe into a long form, which is better for plotly to use
-        # Tidy data: https://vita.had.co.nz/papers/tidy-data.pdf
-        if (LONG_FORM):
-            df = df[selected_params + ['datetime']].melt('datetime', var_name='param',
-                                                         value_name='value')
+    if (df is not None):
+        if (setup is not None):
+            st.write('## Setup 2: Select data')
+            # print(df, setup)
+            selected_params = st.multiselect(
+                'Select parameter(s) to be plotted', [item for item in df.columns.values.tolist()
+                                                      if item != 'datetime'])
 
-        # Create distplot with custom bin_size
-        fig = px.line(df, x='datetime',
-                      y='value',
-                      color='param', title=setup['experiment_title'] if 'experiment_title' in setup else setup['title'],
-                      height=600)
-        fig.update_traces(mode='lines', hovertemplate=None)
-        fig.update_layout(hovermode='x unified')
-        fig.update_layout(xaxis=dict(rangeslider=dict(visible=True),
-                                     type="date"))
+            # Convert the dataframe into a long form, which is better for plotly to use to plot the "single y chart"
+            # Tidy data: https://vita.had.co.nz/papers/tidy-data.pdf
+            if (LONG_FORM):
+                df = df[['datetime'] + selected_params].melt('datetime', var_name='param',
+                                                             value_name='value')
+                fig = plot.single_y_chart(setup, selected_params, df)
+            else:
+                df = df[['datetime'] + selected_params]
+                fig = plot.multi_y_chart(setup, selected_params, df)
 
-        for param in selected_params:
-            # Some data can't set by the user, so it won't be in settings.json
-            # We well skip them
-            if (param in PARAMS_SPEC):
-                upper, lower = plot.get_boundaries(setup, PARAMS_SPEC[param])
-                if (upper != None) and (lower != None):
-                    fig.add_hline(y=upper)
-                    fig.add_hline(y=lower)
-
-        st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write('## No settings configuration found')
+    else:
+        st.write('## No data found')
 
 
 if __name__ == '__main__':
