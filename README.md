@@ -1,4 +1,4 @@
-# CSV Analysis Tool
+# Txt Analysis Tool
 ![Screen Shot 2022-08-31 at 12 28 48](https://user-images.githubusercontent.com/6580698/187592942-ab4c7376-1b75-4d06-9ddd-fc524aaecfd8.png)
 
 ## Abstract
@@ -7,7 +7,7 @@ This tool is designed to convert txt files of datetime and value into line chart
 ## Demo
 Try this out on the streamlit cloud:
 
-https://ghnmqdtg-csv-analysis-tool-main-wp2vrm.streamlitapp.com/
+https://ghnmqdtg-txt-analysis-tool-main-ct2cig.streamlitapp.com/
 
 ## Introduction
 This tool can parse a folder of txts and json inside, and convert them into pandas dataframes. Just drag the whole folder in the field in page.
