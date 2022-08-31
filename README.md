@@ -1,4 +1,6 @@
 # CSV Analysis Tool
+![Screen Shot 2022-08-31 at 12 28 48](https://user-images.githubusercontent.com/6580698/187592942-ab4c7376-1b75-4d06-9ddd-fc524aaecfd8.png)
+
 ## Abstract
 This tool is designed to convert txt files of datetime and value into line chart and read the file `setting.json` to assign the boundary lines of parameters, both txt and json files are needed. With the help of Streamlit and Plotly, you can read visualized data in the browser.
 
@@ -32,7 +34,7 @@ $ pip3 install -r requirements.txt
 # Run the app
 $ streamlit run main.py
 ```
-<img width="1395" alt="Screen Shot 2022-08-20 at 15 20 41" src="https://user-images.githubusercontent.com/6580698/185734388-768fdf38-c774-424a-97a4-02088160cf80.png">
+
 
 ## How to build the app?
 The best way to share the Streamlit app would be to run it on a server and share the app URL, but sometimes we need to run it internally. It's possible but a little bit complex to build the app with Pyinstaller. I built it on Windows by following this [tutorial](https://discuss.streamlit.io/t/using-pyinstaller-or-similar-to-create-an-executable/902/18), and made some updates.
@@ -125,7 +127,3 @@ The best way to share the Streamlit app would be to run it on a server and share
     4. `./utils`
     
     If the app runs successfully, congratulate!
-
-## TODO
-- [ ] Deploy the app to streamlit cloud.
-- [ ] Optimize the speed of rendering large files to chart.
