@@ -133,6 +133,7 @@ dmypy.json
 
 # Project file
 src/*
+!src/Example_data
 !src/README.md
 output/
 S.NEST Spec Sheet_CBSSS001_08192021.pdf
